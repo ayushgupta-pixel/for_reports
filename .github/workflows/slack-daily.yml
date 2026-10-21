@@ -1,0 +1,47 @@
+name: Daily Slack status
+
+on:
+  schedule:
+    # 12:30 UTC = 18:00 IST. GitHub may start scheduled runs a few minutes late.
+    - cron: "30 12 * * *"
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+concurrency:
+  group: slack-daily
+  cancel-in-progress: false
+
+jobs:
+  post:
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+          cache: pip
+
+      - run: pip install -r requirements.txt
+
+      - name: Fetch sheet
+        env:
+          SHEET_ID: ${{ secrets.SHEET_ID || vars.SHEET_ID }}
+          SHEET_GID: ${{ secrets.SHEET_GID || vars.SHEET_GID }}
+        run: |
+          curl -fsSL "https://docs.google.com/spreadsheets/d/${SHEET_ID}/export?format=csv&gid=${SHEET_GID}" -o sheet.csv
+
+      - name: Build data
+        run: python scripts/generate_data.py --sheet sheet.csv --out data.json
+
+      - name: Render screenshot
+        run: python scripts/render_slack.py --data data.json --out slack_view.png
+
+      - name: Post to Slack
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN || vars.SLACK_BOT_TOKEN }}
+          SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID || vars.SLACK_CHANNEL_ID }}
+        run: python scripts/post_slack.py --image slack_view.png

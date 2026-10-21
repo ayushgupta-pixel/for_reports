@@ -1,0 +1,11 @@
+# generated / local-only (contains partner and ARR data, never commit)
+sheet.csv
+data.json
+payload.json
+response.json
+slack_view.png
+tracker_snapshot.json
+report_data*.json
+*.bak*
+__pycache__/
+.venv/

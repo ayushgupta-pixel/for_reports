@@ -1,0 +1,8 @@
+{
+  "total": 0,
+  "live": 0,
+  "live_coverage": [
+    ["System type A", 2, "Partner one · Partner two"],
+    ["System type B", 1, "Partner three"]
+  ]
+}
