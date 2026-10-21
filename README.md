@@ -24,6 +24,7 @@ to a PNG with headless Chrome, and uploads it to the channel.
 | `SLACK_CHANNEL_ID` | Variable | the channel ID |
 | `SHEET_ID` | Secret | the Google Sheet file ID (the sheet must allow link access) |
 | `SHEET_GID` | Variable | the tab's gid |
+| `SLACK_NOTIFY_USER_ID` | Secret | the bot's DM channel ID (`D...`) for run status DMs (optional) |
 
 Use a Secret for the bot token. A Variable is stored in plain text and visible to anyone with repo access.
 If this repo is public, make it private (Settings, Danger Zone): the Actions logs and the workflow are public otherwise.

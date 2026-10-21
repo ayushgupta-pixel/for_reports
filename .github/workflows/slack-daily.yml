@@ -45,3 +45,19 @@ jobs:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN || vars.SLACK_BOT_TOKEN }}
           SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID || vars.SLACK_CHANNEL_ID }}
         run: python scripts/post_slack.py --image slack_view.png
+
+      - name: DM me on success
+        if: success()
+        continue-on-error: true
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN || vars.SLACK_BOT_TOKEN }}
+          SLACK_NOTIFY_USER_ID: ${{ secrets.SLACK_NOTIFY_USER_ID || vars.SLACK_NOTIFY_USER_ID }}
+        run: python scripts/notify_dm.py ok
+
+      - name: DM me on failure
+        if: failure()
+        continue-on-error: true
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN || vars.SLACK_BOT_TOKEN }}
+          SLACK_NOTIFY_USER_ID: ${{ secrets.SLACK_NOTIFY_USER_ID || vars.SLACK_NOTIFY_USER_ID }}
+        run: python scripts/notify_dm.py fail
