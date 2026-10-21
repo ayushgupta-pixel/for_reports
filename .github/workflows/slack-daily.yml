@@ -5,6 +5,12 @@ on:
     # 12:30 UTC = 18:00 IST. GitHub may start scheduled runs a few minutes late.
     - cron: "30 12 * * *"
   workflow_dispatch:
+    inputs:
+      destination:
+        description: "Where to post this run (the schedule always posts to the channel)"
+        type: choice
+        options: [channel, dm]
+        default: channel
 
 permissions:
   contents: read
@@ -40,14 +46,22 @@ jobs:
       - name: Render screenshot
         run: python scripts/render_slack.py --data data.json --out slack_view.png
 
-      - name: Post to Slack
+      - name: Post to Slack (channel)
+        if: inputs.destination != 'dm'
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN || vars.SLACK_BOT_TOKEN }}
           SLACK_CHANNEL_ID: ${{ secrets.SLACK_CHANNEL_ID || vars.SLACK_CHANNEL_ID }}
         run: python scripts/post_slack.py --image slack_view.png
 
+      - name: Post to Slack (DM preview)
+        if: inputs.destination == 'dm'
+        env:
+          SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN || vars.SLACK_BOT_TOKEN }}
+          SLACK_CHANNEL_ID: ${{ secrets.SLACK_NOTIFY_USER_ID || vars.SLACK_NOTIFY_USER_ID }}
+        run: python scripts/post_slack.py --image slack_view.png --comment "Preview for approval - not yet posted to the channel"
+
       - name: DM me on success
-        if: success()
+        if: success() && inputs.destination != 'dm'
         continue-on-error: true
         env:
           SLACK_BOT_TOKEN: ${{ secrets.SLACK_BOT_TOKEN || vars.SLACK_BOT_TOKEN }}
